@@ -41,6 +41,9 @@ WPT_SUBSUITES = {
     "webcodecs": ["webcodecs"],
     "eme": ["encrypted-media"],
 }
+_WPT_ALL_SUBSUITE_PATHS = [
+    path for paths in WPT_SUBSUITES.values() for path in paths
+]
 
 
 def get_test_tags(config, env):
@@ -398,9 +401,6 @@ class DefaultLoader(BaseManifestLoader):
                     if any(x in manifest for x in subsuite_paths):
                         manifests.add(manifest)
             else:
-                all_subsuite_paths = [
-                    path for paths in WPT_SUBSUITES.values() for path in paths
-                ]
                 for t in tests:
                     if mozinfo_tags and not any(
                         x in t.get("tags", []) for x in mozinfo_tags
@@ -408,7 +408,7 @@ class DefaultLoader(BaseManifestLoader):
                         continue
 
                     manifest = t["manifest"]
-                    if not any(path in manifest for path in all_subsuite_paths):
+                    if not any(path in manifest for path in _WPT_ALL_SUBSUITE_PATHS):
                         manifests.add(manifest)
 
             return {
