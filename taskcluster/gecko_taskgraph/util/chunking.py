@@ -274,23 +274,17 @@ def resolve_manifest_runtimes(all_runtimes, manifests):
         A dict mapping manifest paths to their total runtime in seconds.
         Manifests with no runtime data are omitted.
     """
+    included_runtimes = {}
+    for key, value in all_runtimes.items():
+        if ":" in key:
+            parent = key.split(":", 1)[0]
+            included_runtimes[parent] = included_runtimes.get(parent, 0) + value
+
     runtimes = {}
     for manifest in manifests:
-        total_runtime = 0
-        found = False
-
-        if manifest in all_runtimes:
-            total_runtime += all_runtimes[manifest]
-            found = True
-
-        if manifest.endswith(".toml"):
-            prefix = manifest + ":"
-            for key, value in all_runtimes.items():
-                if key.startswith(prefix):
-                    total_runtime += value
-                    found = True
-
-        if found:
+        total_runtime = all_runtimes.get(manifest, 0)
+        total_runtime += included_runtimes.get(manifest, 0)
+        if total_runtime:
             runtimes[manifest] = total_runtime
 
     return runtimes
