@@ -86,4 +86,17 @@ def register(graph_config):
     # TODO Investigate merging our verifications with upstream.
     generator.verifications = verifications
 
+    # Pre-warm the manifest runtimes cache in the parent process before kinds
+    # are loaded in parallel via fork, so forked children inherit the result
+    # via copy-on-write rather than each making their own network request.
+    _orig_load_tasks_parallel = generator.TaskGraphGenerator._load_tasks_parallel
+
+    def _load_tasks_parallel(self, *args, **kwargs):
+        from gecko_taskgraph.util.chunking import _load_manifest_runtimes_data
+
+        _load_manifest_runtimes_data()
+        return _orig_load_tasks_parallel(self, *args, **kwargs)
+
+    generator.TaskGraphGenerator._load_tasks_parallel = _load_tasks_parallel
+
     register_parameters()
