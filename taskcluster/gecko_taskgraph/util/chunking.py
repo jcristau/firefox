@@ -377,6 +377,12 @@ class DefaultLoader(BaseManifestLoader):
         )
 
     @functools.cache
+    def get_all_manifests(self, suite):
+        return frozenset(
+            chunk_by_runtime.get_manifest(t) for t in self.get_tests(suite)
+        )
+
+    @functools.cache
     def get_manifests(self, suite, frozen_mozinfo):
         mozinfo = dict(frozen_mozinfo)
 
@@ -447,8 +453,7 @@ class DefaultLoader(BaseManifestLoader):
 
         active_manifests = {chunk_by_runtime.get_manifest(t) for t in active_tests}
 
-        skipped_manifests = {chunk_by_runtime.get_manifest(t) for t in tests}
-        skipped_manifests.difference_update(active_manifests)
+        skipped_manifests = self.get_all_manifests(suite) - active_manifests
         return {
             "active": list(active_manifests),
             "skipped": list(skipped_manifests),
