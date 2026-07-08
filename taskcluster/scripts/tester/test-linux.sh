@@ -199,7 +199,7 @@ if $NEED_WINDOW_MANAGER; then
         xsession_args=()
         if [ $RELEASE = "18.04" ]; then
             echo export XDG_CURRENT_DESKTOP=GNOME > $HOME/.xsessionrc
-        elif [ $RELEASE = "24.04" ]; then
+        elif [ $RELEASE = "24.04" ] || [ $RELEASE = "26.04" ]; then
             # taken from /usr/share/xsessions/ubuntu.desktop
             echo export XDG_CURRENT_DESKTOP=ubuntu:GNOME > $HOME/.xsessionrc
             echo export GNOME_SHELL_SESSION_MODE=ubuntu >> $HOME/.xsessionrc
