@@ -206,6 +206,22 @@ linux-tests:
     - test-verify-wpt
     - xpcshell
 
+# Covers the suites `os-integration.yml` picks for its unittest matrix,
+# without pulling in kinds (reftest, web-platform-tests, ...) that haven't
+# been vetted yet on the new Ubuntu 26.04 image.
+linux2604-os-integration-tests:
+    - marionette-integration
+    - mochitest-browser-chrome
+    - mochitest-browser-media
+    - mochitest-chrome
+    - mochitest-media
+    - mochitest-plain
+    - mochitest-remote
+    - mochitest-webgl1-core
+    - mochitest-webgl2-core
+    - mochitest-webgpu
+    - xpcshell
+
 linux-2404-tsan-tests:
     - cppunittest
     - crashtest

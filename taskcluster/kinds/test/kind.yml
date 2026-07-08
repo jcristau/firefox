@@ -60,7 +60,9 @@ task-defaults:
                         default: false
                 default: false
     docker-image:
-        in-tree: ubuntu2404-test
+        by-test-platform:
+            linux2604.*: {in-tree: ubuntu2604-test}
+            default: {in-tree: ubuntu2404-test}
     fetches:
         fetch:
             by-test-platform:
@@ -89,6 +91,10 @@ task-defaults:
                     - linux64-minidump-stackwalk
                     - linux64-fix-stacks
                     - linux64-hostutils
+                linux2604.*:
+                    - linux64-minidump-stackwalk
+                    - linux64-fix-stacks
+                    - linux64-2604-dbus-python
                 default:
                     - linux64-minidump-stackwalk
                     - linux64-fix-stacks
