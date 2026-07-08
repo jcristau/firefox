@@ -70,6 +70,15 @@ tasks:
         parent: ubuntu2404-arm64-base
         definition: build-python-wheels
         arch: arm64
+    ubuntu2604-build-python-wheels:
+        symbol: I(ub26-build-python-wheels)
+        parent: ubuntu2604-base
+        definition: build-python-wheels
+    ubuntu2604-arm64-build-python-wheels:
+        symbol: I(ub26-arm64-python-wheels)
+        parent: ubuntu2604-arm64-base
+        definition: build-python-wheels
+        arch: arm64
     # Neither the ubuntu2004-*raw nor the ubuntu2004-*packages images can have
     # packages dependencies.
     ubuntu2004-raw:
@@ -106,6 +115,19 @@ tasks:
             BASE_IMAGE: ubuntu:noble-20250714
             SNAPSHOT: 20250716T072533Z
         arch: arm64
+    ubuntu2604-raw:
+        symbol: I(ub26-raw)
+        definition: debian-raw
+        args:
+            BASE_IMAGE: ubuntu:resolute-20260627
+            SNAPSHOT: 20260629T000000Z
+    ubuntu2604-arm64-raw:
+        symbol: I(ub26-a64-raw)
+        definition: debian-raw
+        args:
+            BASE_IMAGE: ubuntu:resolute-20260627
+            SNAPSHOT: 20260629T000000Z
+        arch: arm64
     ubuntu2004-packages:
         symbol: I(ub20-pkg)
         definition: debian-packages
@@ -122,6 +144,15 @@ tasks:
         symbol: I(ub24-a64-pkg)
         definition: debian-packages
         parent: ubuntu2404-arm64-raw
+        arch: arm64
+    ubuntu2604-packages:
+        symbol: I(ub26-pkg)
+        definition: debian-packages
+        parent: ubuntu2604-raw
+    ubuntu2604-arm64-packages:
+        symbol: I(ub26-a64-pkg)
+        definition: debian-packages
+        parent: ubuntu2604-arm64-raw
         arch: arm64
     ubuntu2004-base:
         symbol: I(ub20-base)
@@ -177,6 +208,39 @@ tasks:
         symbol: I(ub24-a64-test)
         parent: ubuntu2404-arm64-test-base
         definition: ubuntu2404-test
+        arch: arm64
+    ubuntu2604-base:
+        symbol: I(ub26-base)
+        definition: debian-base
+        parent: ubuntu2604-raw
+        packages:
+            - ub26-mercurial
+            - ub26-python-zstandard
+    ubuntu2604-arm64-base:
+        symbol: I(ub26-a64-base)
+        definition: debian-base
+        parent: ubuntu2604-arm64-raw
+        packages:
+            - ub26-arm64-mercurial
+            - ub26-arm64-python-zstandard
+        arch: arm64
+    ubuntu2604-test-base:
+        symbol: I(ub26-test-base)
+        parent: ubuntu2604-base
+    ubuntu2604-arm64-test-base:
+        symbol: I(ub26-a64-test-base)
+        parent: ubuntu2604-arm64-base
+        definition: ubuntu2604-test-base
+        arch: arm64
+        args:
+            ARCH: arm64
+    ubuntu2604-test:
+        symbol: I(ub26-test)
+        parent: ubuntu2604-test-base
+    ubuntu2604-arm64-test:
+        symbol: I(ub26-a64-test)
+        parent: ubuntu2604-arm64-test-base
+        definition: ubuntu2604-test
         arch: arm64
     # Neither the debian8-*raw nor the debian8-*packages images can have
     # packages dependencies.
