@@ -213,16 +213,10 @@ tasks:
         symbol: I(ub26-base)
         definition: debian-base
         parent: ubuntu2604-raw
-        packages:
-            - ub26-mercurial
-            - ub26-python-zstandard
     ubuntu2604-arm64-base:
         symbol: I(ub26-a64-base)
         definition: debian-base
         parent: ubuntu2604-arm64-raw
-        packages:
-            - ub26-arm64-mercurial
-            - ub26-arm64-python-zstandard
         arch: arm64
     ubuntu2604-test-base:
         symbol: I(ub26-test-base)

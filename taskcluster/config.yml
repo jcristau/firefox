@@ -153,8 +153,6 @@ treeherder:
         'Ub22a64': 'AArch64 packages for Ubuntu 22.04'
         'Ub24': 'Packages for Ubuntu 24.04'
         'Ub24a64': 'AArch64 packages for Ubuntu 24.04'
-        'Ub26': 'Packages for Ubuntu 26.04'
-        'Ub26a64': 'AArch64 packages for Ubuntu 26.04'
         'I': 'Docker Image Builds'
         'TA': 'Toolchain builds for Android'
         'TL': 'Toolchain builds for Linux 64-bits'
