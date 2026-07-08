@@ -44,7 +44,7 @@ apt_packages+=('gstreamer1.0-pulseaudio')
 apt_packages+=('language-pack-en-base')
 apt_packages+=('libc6-dbg')
 apt_packages+=('libasound2-dev')
-apt_packages+=('libavcodec-extra60')
+apt_packages+=('libavcodec-extra')
 apt_packages+=('libcanberra-gtk3-module')
 apt_packages+=('libcanberra-pulse')
 apt_packages+=('libcurl4-openssl-dev')
@@ -120,7 +120,7 @@ if [[ "$ARCH" == "amd64" ]]; then
 
     # Make sure we have libraries for 32-bit tests
     apt_packages=()
-    apt_packages+=('libavcodec-extra60:i386')
+    apt_packages+=('libavcodec-extra:i386')
     apt_packages+=('libpulse0:i386')
     apt_packages+=('libxt6t64:i386')
     apt_packages+=('libxtst6:i386')
