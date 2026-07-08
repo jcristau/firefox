@@ -44,7 +44,7 @@ RUN apt-get update && \
       zip \
       zstd
 
-RUN pip3 install taskcluster==98.0.0
+RUN pip3 install --break-system-packages taskcluster==98.0.0
 
 RUN locale-gen "$LANG"
 
@@ -77,10 +77,10 @@ RUN curl -L https://github.com/Flank/flank/releases/download/v${FLANK_VERSION}/f
     && chmod +x ${FLANK_DOWNLOAD}
 
 # Used in taskcluster/scripts/tests/parse-junit-results.py for parsing and displaying JUnit XML results
-RUN pip3 install junitparser==4.0.2 beautifultable==1.1.0
+RUN pip3 install --break-system-packages junitparser==4.0.2 beautifultable==1.1.0
 
 # Used for env var ingest in testrail.py
-RUN pip3 install python-dotenv==1.2.2
+RUN pip3 install --break-system-packages python-dotenv==1.2.2
 
 # run-task expects to run as root
 USER root
