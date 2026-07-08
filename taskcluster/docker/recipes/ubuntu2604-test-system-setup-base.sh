@@ -103,9 +103,7 @@ apt-get update
 apt-get install --allow-downgrades "${apt_packages[@]}"
 
 # libgallium debug symbols
-# XXX: pin to the actual mesa-libgallium version shipped in Ubuntu 26.04 once
-# known; the 24.04 version below is very likely wrong for resolute.
-wget -O /tmp/mesa-libgallium-dbgsym.ddeb "https://launchpad.net/ubuntu/+archive/primary/+files/mesa-libgallium-dbgsym_24.2.8-1ubuntu1~24.04.1_$ARCH.ddeb"
+wget -O /tmp/mesa-libgallium-dbgsym.ddeb "https://launchpad.net/ubuntu/+archive/primary/+files/mesa-libgallium-dbgsym_26.0.3-1ubuntu1_$ARCH.ddeb"
 dpkg -i /tmp/mesa-libgallium-dbgsym.ddeb
 
 # gsd-power can't start without logind, but it's marked as required in the
