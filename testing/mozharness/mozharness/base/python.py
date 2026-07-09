@@ -565,10 +565,10 @@ class VirtualenvMixin:
                 self.run_command([uv_executable, "--version"])
 
                 # MOZ_PYTHON_HOME is only set in CI, but this code can execute locally for testing
-                # (e.g.: `./mach raptor`), so let's fall back to the sys.executable path in that case.
-                python_path = os.environ.get(
-                    "MOZ_PYTHON_HOME", Path(sys.executable).parents[1]
-                )
+                # (e.g.: `./mach raptor`), so let's fall back to sys.executable in that case. Passing
+                # the interpreter directly (rather than guessing a parent "prefix" directory) avoids
+                # assuming a Unix-style prefix/bin/python3 layout, which doesn't hold on Windows.
+                python_path = os.environ.get("MOZ_PYTHON_HOME", sys.executable)
                 uv_venv_creation_command = [
                     "uv",
                     "venv",
