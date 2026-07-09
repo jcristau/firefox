@@ -112,6 +112,7 @@ support-files = "file_test_clipboard_getDataSnapshot.js"
 support-files = ["window_composition_text_querycontent.xhtml"]
 skip-if = [
   "os == 'linux' && display == 'x11' && opt && standalone", # Bug 2026600
+  "os == 'linux' && os_version == '26.04' && display == 'x11'", # Bug 2053412 - caret width mismatch under the headless gnome-shell setup
 ]
 
 ["test_ime_focus_with_multiple_contenteditable.html"]
@@ -214,6 +215,7 @@ skip-if = [
 ["test_position_on_resize.xhtml"]
 skip-if = [
   "os == 'linux' && os_version == '24.04' && arch == 'x86_64' && display == 'x11'", # Bug 1616760
+  "os == 'linux' && os_version == '26.04' && arch == 'x86_64' && display == 'x11'", # Bug 1616760
 ]
 
 ["test_secure_input.html"]
@@ -249,6 +251,7 @@ run-if = [
 ["test_taskbar_progress.xhtml"]
 skip-if = [
   "os == 'linux' && os_version == '24.04' && arch == 'x86_64' && display == 'x11'",
+  "os == 'linux' && os_version == '26.04' && arch == 'x86_64' && display == 'x11'",
 ]
 
 ["test_transferable_overflow.xhtml"]
