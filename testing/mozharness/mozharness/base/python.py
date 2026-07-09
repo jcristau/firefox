@@ -689,12 +689,19 @@ class VirtualenvMixin:
         if self._is_windows():
             site_packages_dir = venv_root_dir / "Lib" / "site-packages"
         else:
-            site_packages_dir = (
-                venv_root_dir
-                / "lib"
-                / "python{}.{}".format(*sys.version_info)
-                / "site-packages"
-            )
+            # The venv's python (e.g. a fetched toolchain one) may not be
+            # the same as the one currently running mozharness, so don't
+            # assume sys.version_info matches the venv's own version.
+            python_dirs = sorted((venv_root_dir / "lib").glob("python3.*"))
+            if python_dirs:
+                site_packages_dir = python_dirs[0] / "site-packages"
+            else:
+                site_packages_dir = (
+                    venv_root_dir
+                    / "lib"
+                    / "python{}.{}".format(*sys.version_info)
+                    / "site-packages"
+                )
 
         os.environ["PATH"] = os.pathsep.join(
             [str(bin_dir)] + os.environ.get("PATH", "").split(os.pathsep)
