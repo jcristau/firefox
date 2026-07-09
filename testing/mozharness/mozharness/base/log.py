@@ -333,7 +333,11 @@ class OutputParser(LogMixin):
                     if error_check.get("summary"):
                         self.add_summary(message, level=log_level)
                     else:
-                        self.log(message, level=log_level)
+                        self.log(
+                            message,
+                            level=log_level,
+                            exit_code=error_check.get("exit_code", -1),
+                        )
                 if log_level in (ERROR, CRITICAL, FATAL):
                     self.num_errors += 1
                 if log_level == WARNING:

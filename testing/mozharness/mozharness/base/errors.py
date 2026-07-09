@@ -19,7 +19,7 @@ warning; etc.) or platform or language or whatever.
 
 import re
 
-from mozharness.base.log import CRITICAL, DEBUG, ERROR, WARNING
+from mozharness.base.log import CRITICAL, DEBUG, ERROR, FATAL, WARNING
 
 
 # Exceptions
@@ -77,6 +77,10 @@ PythonErrorList = BaseErrorList + [
     {"regex": re.compile(r"""raise \w*Error: """), "level": CRITICAL},
 ]
 
+# Exit code taskcluster's docker-worker treats as "purge the task's caches
+# and retry", see EXIT_PURGE_CACHE in taskcluster/scripts/run-task.
+EXIT_PURGE_CACHES = 72
+
 VirtualenvErrorList = [
     {"substr": r"""not found or a compiler error:""", "level": WARNING},
     {"regex": re.compile(r"""\d+: error: """), "level": ERROR},
@@ -84,6 +88,14 @@ VirtualenvErrorList = [
     {
         "regex": re.compile(r"""Downloading .* \(.*\): *([0-9]+%)? *[0-9\.]+[kmKM]b"""),
         "level": DEBUG,
+    },
+    {
+        # uv's local wheel cache can end up with a corrupted/truncated
+        # entry; retrying against the same cache just repeats the failure,
+        # so purge the caches and let taskcluster retry the whole task.
+        "substr": r"""Encountered an unexpected header""",
+        "level": FATAL,
+        "exit_code": EXIT_PURGE_CACHES,
     },
 ] + PythonErrorList
 
