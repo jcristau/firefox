@@ -25,6 +25,9 @@ run-if = [
 support-files = ["window_bug429954.xhtml"]
 
 ["test_bug444800.xhtml"]
+skip-if = [
+  "os == 'linux' && os_version == '26.04' && display == 'x11'", # Bug 2053412 - gdk-pixbuf's Glycin JPEG encoder rejects RGBA input
+]
 
 ["test_bug466599.xhtml"]
 run-if = [
