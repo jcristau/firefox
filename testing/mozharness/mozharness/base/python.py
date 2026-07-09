@@ -902,7 +902,13 @@ class ResourceMonitoringMixin(PerfherderResourceOptionsMixin):
 
     def _log_resource_usage(self):
         # Delay import because not available until virtualenv is populated.
-        import jsonschema
+        try:
+            import jsonschema
+        except ImportError:
+            self.warning(
+                "could not import jsonschema; skipping resource usage reporting"
+            )
+            return
 
         rm = self._resource_monitor
 
