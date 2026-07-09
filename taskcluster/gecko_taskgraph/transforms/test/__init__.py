@@ -692,6 +692,8 @@ def make_job_description(config, tasks):
         if task.get("fetches"):
             jobdesc["fetches"] = task.pop("fetches")
 
+        jobdesc["use-python"] = task.pop("use-python")
+
         yield jobdesc
 
 
