@@ -112,6 +112,17 @@ support-files = "file_test_clipboard_getDataSnapshot.js"
 support-files = ["window_composition_text_querycontent.xhtml"]
 skip-if = [
   "os == 'linux' && display == 'x11' && opt && standalone", # Bug 2026600
+  # Bug 2053412: runCompositionTest's caret-width comparison (#1-2) is
+  # sensitive to sub-pixel caret positioning, not an actual width
+  # difference. nsCaret::ComputeMetrics computes the identical width for
+  # both offsets compared (confirmed via temporary logging), but
+  # LayoutDeviceIntRect::FromAppUnitsToOutside() outward-rounds a caret
+  # rect that's exactly 1 device pixel wide to 2px whenever its
+  # (glyph-advance-dependent) x-position doesn't land on a device-pixel
+  # boundary. Whether that happens depends on exact sub-pixel font
+  # metrics, which differ enough under this platform's rendering setup
+  # to flip the result; also observed to be non-deterministic run to run.
+  "os == 'linux' && os_version == '26.04' && display == 'x11'",
 ]
 
 ["test_ime_focus_with_multiple_contenteditable.html"]
