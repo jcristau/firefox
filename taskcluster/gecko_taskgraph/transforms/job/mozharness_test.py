@@ -159,7 +159,10 @@ def mozharness_test_on_docker(config, job, taskdesc):
         ):
             env.update({"NEED_COMPIZ": "true"})
 
-    if test.get("docker-image", {}).get("in-tree") == "ubuntu2404-test":
+    if test.get("docker-image", {}).get("in-tree") in (
+        "ubuntu2404-test",
+        "ubuntu2604-test",
+    ):
         env["NEED_PIPEWIRE"] = "true"
 
     # Set MOZ_ENABLE_WAYLAND env variables to enable Wayland backend.
