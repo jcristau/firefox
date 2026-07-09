@@ -36,10 +36,13 @@ def test_query_paths(run_mach, capfd, show_chunk_numbers):
     index = output.find(delim)
     result = json.loads(output[index + len(delim) :])
 
-    # If there are more than one tasks here, it means that something went wrong
-    # with the path filtering.
+    # If there are more tasks here than expected, it means that something went
+    # wrong with the path filtering.
     tasks = result["parameters"]["try_task_config"]["tasks"]
-    assert tasks == [f"test-linux2404-64/debug-mochitest-chrome-1proc-{chunk}"]
+    assert tasks == [
+        f"test-linux2404-64/debug-mochitest-chrome-1proc-{chunk}",
+        f"test-linux2604-64/debug-mochitest-chrome-1proc-{chunk}",
+    ]
 
 
 @pytest.mark.skipif(os.name == "nt", reason="fzf not installed on host")
