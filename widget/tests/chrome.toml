@@ -122,6 +122,13 @@ skip-if = [
   # boundary. Whether that happens depends on exact sub-pixel font
   # metrics, which differ enough under this platform's rendering setup
   # to flip the result; also observed to be non-deterministic run to run.
+  # This skip covers the whole file, but running it with the skip removed
+  # also turned up unrelated failures (beforeinput/compositionend
+  # ordering in runRemoveContentTest, missing textInput events in
+  # runCompositionCommitTest/runCompositionCommitAsIsTest, wrong IME
+  # selection shift in runCompositionTestWhoseTextNodeModified, and
+  # "tentative caret offset" issues in runCharAtPointTest) that weren't
+  # individually root-caused - they may or may not share the same cause.
   "os == 'linux' && os_version == '26.04' && display == 'x11'",
 ]
 
