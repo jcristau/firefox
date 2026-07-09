@@ -38,6 +38,11 @@ fi
 : MOZ_ENABLE_WAYLAND            ${MOZ_ENABLE_WAYLAND}
 : NEED_XVFB                     ${NEED_XVFB:=true}
 : NEED_WINDOW_MANAGER           ${NEED_WINDOW_MANAGER:=false}
+
+if [ "$DISTRIBUTION" = "Ubuntu" ] && [ "$RELEASE" = "26.04" ]; then
+    # gnome-shell provides its own headless display; see below.
+    NEED_XVFB=false
+fi
 : NEED_PULSEAUDIO               ${NEED_PULSEAUDIO:=false}
 : NEED_PIPEWIRE                 ${NEED_PIPEWIRE:=false}
 : NEED_COMPIZ                   ${NEED_COPMPIZ:=false}
@@ -199,7 +204,7 @@ if $NEED_WINDOW_MANAGER; then
         xsession_args=()
         if [ $RELEASE = "18.04" ]; then
             echo export XDG_CURRENT_DESKTOP=GNOME > $HOME/.xsessionrc
-        elif [ $RELEASE = "24.04" ] || [ $RELEASE = "26.04" ]; then
+        elif [ $RELEASE = "24.04" ]; then
             # taken from /usr/share/xsessions/ubuntu.desktop
             echo export XDG_CURRENT_DESKTOP=ubuntu:GNOME > $HOME/.xsessionrc
             echo export GNOME_SHELL_SESSION_MODE=ubuntu >> $HOME/.xsessionrc
@@ -222,14 +227,40 @@ if $NEED_WINDOW_MANAGER; then
         eval `dbus-launch --sh-syntax`
     fi
 
-    # DISPLAY has already been set above
-    # XXX: it would be ideal to add a semaphore logic to make sure that the
-    # window manager is ready
-    (
-        # if env var is >8K, we have a seg fault in xsession
-        unset MOZHARNESS_TEST_PATHS
-        /etc/X11/Xsession "${xsession_args[@]}" 2>&1 &
-    )
+    if [ $DISTRIBUTION == "Ubuntu" ] && [ $RELEASE = "26.04" ]; then
+        # GNOME 50 (Ubuntu 26.04) removed gnome-session's non-systemd
+        # startup path, and a systemd --user instance can't run here (no
+        # writable cgroup2 delegation in this container). Run gnome-shell
+        # directly in --headless mode instead of going through
+        # gnome-session/Xsession; it still spawns a fully functional
+        # Xwayland we can point Firefox at.
+        # https://blogs.gnome.org/adrianvovk/2025/06/10/gnome-systemd-dependencies/
+        gnome-shell --headless --virtual-monitor=1600x1200 &
+
+        retry_count=10
+        while [ -z "$(pidof -s Xwayland)" ]; do
+          if [ $retry_count = 0 ]; then
+            echo "Xwayland still not up, retrying the task" >&2
+            exit 4
+          fi
+          retry_count=$((retry_count - 1))
+          sleep 5
+        done
+        # mutter passes DISPLAY/XAUTHORITY explicitly when it execs
+        # Xwayland; read them from there rather than parsing logs or
+        # depending on mutter's internal auth-file naming convention.
+        eval "$(tr '\0' '\n' < /proc/$(pidof -s Xwayland)/environ | grep -E '^(DISPLAY|XAUTHORITY)=')"
+        export DISPLAY XAUTHORITY
+    else
+        # DISPLAY has already been set above
+        # XXX: it would be ideal to add a semaphore logic to make sure that the
+        # window manager is ready
+        (
+            # if env var is >8K, we have a seg fault in xsession
+            unset MOZHARNESS_TEST_PATHS
+            /etc/X11/Xsession "${xsession_args[@]}" 2>&1 &
+        )
+    fi
 
     # Turn off the screen saver and screen locking
     gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
@@ -298,7 +329,7 @@ elif [[ $NEED_COMPIZ == true ]] && [[ $RELEASE == 18.04 ]]; then
 fi
 
 # Bug 1607713 - set cursor position to 0,0 to avoid odd libx11 interaction
-if $NEED_WINDOW_MANAGER && [ $DISPLAY == ':0' ]; then
+if $NEED_WINDOW_MANAGER && [ -n "$DISPLAY" ]; then
     xwit -root -warp 0 0
 fi
 
