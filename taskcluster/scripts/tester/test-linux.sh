@@ -39,8 +39,14 @@ fi
 : NEED_XVFB                     ${NEED_XVFB:=true}
 : NEED_WINDOW_MANAGER           ${NEED_WINDOW_MANAGER:=false}
 
+USE_HEADLESS_GNOME_SHELL=false
 if [ "$DISTRIBUTION" = "Ubuntu" ] && [ "$RELEASE" = "26.04" ]; then
-    # gnome-shell provides its own headless display; see below.
+    # GNOME 50 (Ubuntu 26.04) removed gnome-session's non-systemd startup
+    # path, and a systemd --user instance can't run here (no writable
+    # cgroup2 delegation in this container), so we run gnome-shell
+    # directly instead; see below. It provides its own headless display,
+    # so Xvfb isn't needed.
+    USE_HEADLESS_GNOME_SHELL=true
     NEED_XVFB=false
 fi
 : NEED_PULSEAUDIO               ${NEED_PULSEAUDIO:=false}
@@ -129,6 +135,17 @@ cleanup_mutter() {
     fi
 }
 
+cleanup_gnome_shell() {
+    local vnc=${START_VNC:-false}
+    local interactive=${TASKCLUSTER_INTERACTIVE:-false}
+    if [[ $vnc == false ]] && [[ $interactive == false ]] && [ -n "$gnome_shell_pid" ]; then
+        # Xwayland exits on its own once gnome-shell (its parent compositor)
+        # goes away.
+        echo "Killing gnome-shell (${gnome_shell_pid})"
+        kill $gnome_shell_pid 2>/dev/null || true
+    fi
+}
+
 cleanup() {
     local rv=$?
     if $NEED_PIPEWIRE; then
@@ -136,6 +153,9 @@ cleanup() {
     fi
     if [ $MOZ_ENABLE_WAYLAND ]; then
         cleanup_mutter
+    fi
+    if $USE_HEADLESS_GNOME_SHELL; then
+        cleanup_gnome_shell
     fi
     if $NEED_XVFB; then
         cleanup_xvfb
@@ -227,15 +247,11 @@ if $NEED_WINDOW_MANAGER; then
         eval `dbus-launch --sh-syntax`
     fi
 
-    if [ $DISTRIBUTION == "Ubuntu" ] && [ $RELEASE = "26.04" ]; then
-        # GNOME 50 (Ubuntu 26.04) removed gnome-session's non-systemd
-        # startup path, and a systemd --user instance can't run here (no
-        # writable cgroup2 delegation in this container). Run gnome-shell
-        # directly in --headless mode instead of going through
-        # gnome-session/Xsession; it still spawns a fully functional
-        # Xwayland we can point Firefox at.
-        # https://blogs.gnome.org/adrianvovk/2025/06/10/gnome-systemd-dependencies/
-        gnome-shell --headless --virtual-monitor=1600x1200 &
+    if $USE_HEADLESS_GNOME_SHELL; then
+        mkdir -p ~/artifacts/gnome-shell
+        gnome-shell --headless --virtual-monitor=1600x1200 \
+            > ~/artifacts/gnome-shell/gnome-shell.log 2>&1 &
+        gnome_shell_pid=$!
 
         retry_count=10
         while [ -z "$(pidof -s Xwayland)" ]; do
@@ -246,10 +262,11 @@ if $NEED_WINDOW_MANAGER; then
           retry_count=$((retry_count - 1))
           sleep 5
         done
+        xwayland_pid=$(pidof -s Xwayland)
         # mutter passes DISPLAY/XAUTHORITY explicitly when it execs
         # Xwayland; read them from there rather than parsing logs or
         # depending on mutter's internal auth-file naming convention.
-        eval "$(tr '\0' '\n' < /proc/$(pidof -s Xwayland)/environ | grep -E '^(DISPLAY|XAUTHORITY)=')"
+        eval "$(tr '\0' '\n' < /proc/$xwayland_pid/environ | grep -E '^(DISPLAY|XAUTHORITY)=')"
         export DISPLAY XAUTHORITY
     else
         # DISPLAY has already been set above
