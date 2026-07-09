@@ -94,8 +94,8 @@ task-defaults:
                 linux2604.*:
                     - linux64-minidump-stackwalk
                     - linux64-fix-stacks
-                    - linux64-2604-dbus-python
+                    - linux64-python3.9-dbus-python
                 default:
                     - linux64-minidump-stackwalk
                     - linux64-fix-stacks
-                    - linux64-2404-dbus-python
+                    - linux64-python3.9-dbus-python
