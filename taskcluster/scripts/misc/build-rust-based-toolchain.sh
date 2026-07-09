@@ -24,10 +24,12 @@ x86_64-unknown-linux-gnu)
     # when not cross-compiling, leading to a sysroot discrepancy.
     # Using C*FLAGS_x86_64_unknown_linux_gnu makes the flags apply to both host
     # and target.
-    # -D_DEFAULT_SOURCE: some crates (e.g. aws-lc-sys) also set -D_XOPEN_SOURCE,
-    # which on glibc hides extensions like getentropy() unless _DEFAULT_SOURCE
-    # (or _GNU_SOURCE) is also defined.
-    export CFLAGS_x86_64_unknown_linux_gnu="-D_DEFAULT_SOURCE --sysroot=$MOZ_FETCHES_DIR/sysroot-x86_64-linux-gnu -fuse-ld=lld"
+    # -DHAVE_LINUX_RANDOM_H: aws-lc-sys probes for <linux/random.h> at build
+    # time to decide between a getentropy()-based or /dev/urandom-based
+    # entropy source; the probe fails against our old (Debian 8) sysroot,
+    # picking getentropy() - which that glibc (2.19) predates and doesn't
+    # declare at all. Force the /dev/urandom path instead.
+    export CFLAGS_x86_64_unknown_linux_gnu="-DHAVE_LINUX_RANDOM_H=1 --sysroot=$MOZ_FETCHES_DIR/sysroot-x86_64-linux-gnu -fuse-ld=lld"
     export CXXFLAGS_x86_64_unknown_linux_gnu="-D_GLIBCXX_USE_CXX11_ABI=0 --sysroot=$MOZ_FETCHES_DIR/sysroot-x86_64-linux-gnu -fuse-ld=lld"
     ;;
 aarch64-unknown-linux-gnu)
