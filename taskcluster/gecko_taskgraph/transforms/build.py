@@ -161,6 +161,50 @@ def use_artifact(config, jobs):
         yield job
 
 
+# Test packages that require a native compile and can't be produced by (or
+# universal-merged from) an artifact build. Keep in sync with the suites
+# marked `supports-artifact-builds: false` in `taskcluster/kinds/test/compiled.yml`.
+COMPILE_ONLY_TEST_ARTIFACTS = {
+    "target.cppunittest.tests.tar.zst",
+    "target.gtest.tests.tar.zst",
+    "target.jittest.tests.tar.zst",
+}
+
+# The macOS universal-build "unify" jobs fetch from two per-arch sub-builds.
+# Map each fetches: key (the dependency's job label) to that dependency's own
+# index job-name, so we can tell whether --artifact would turn it into an
+# artifact build.
+UNIFY_DEP_INDEX_JOB_NAMES = {
+    "macosx64-x64-shippable-opt": "macosx64-x64-opt",
+    "macosx64-aarch64-shippable-opt": "macosx64-aarch64-opt",
+}
+
+
+@transforms.add
+def filter_compile_only_fetches_for_unify(config, jobs):
+    """Drop compile-only test packages from unify jobs' fetches when either
+    underlying per-arch sub-build would be an artifact build, since a valid
+    universal binary can't be produced from just one architecture."""
+    try_config = config.params.get("try_task_config", {})
+    use_artifact = try_config.get("use-artifact-builds", False)
+    for job in jobs:
+        fetches = job.get("fetches")
+        if (
+            use_artifact
+            and fetches
+            and any(
+                UNIFY_DEP_INDEX_JOB_NAMES.get(dep) in ARTIFACT_JOBS for dep in fetches
+            )
+        ):
+            for dep, entries in fetches.items():
+                fetches[dep] = [
+                    entry
+                    for entry in entries
+                    if entry["artifact"] not in COMPILE_ONLY_TEST_ARTIFACTS
+                ]
+        yield job
+
+
 @transforms.add
 def use_profile_data(config, jobs):
     for job in jobs:
